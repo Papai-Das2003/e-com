@@ -32,7 +32,7 @@ const ProductImages = ({ images, selectedImage, onSelectImage }) => (
 );
 
 // Component to display product details
-const ProductDetails = ({ product, selectedSize, onSelectSize, currency }) => (
+const ProductDetails = ({ product, selectedSize, onSelectSize, currency, addToCart, productData }) => (
   <div className='flex-1'>
     <h1 className='font-medium text-2xl mt-2'>{product.name}</h1>
 
@@ -68,7 +68,9 @@ const ProductDetails = ({ product, selectedSize, onSelectSize, currency }) => (
     </div>
 
     {/* Add to Cart Button */}
-    <button className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
+    <button onClick={() => addToCart(productData._id, selectedSize)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>
+      ADD TO CART
+    </button>
 
     {/* Additional Info */}
     <hr className='mt-8 sm:w-4/5' />
@@ -82,21 +84,23 @@ const ProductDetails = ({ product, selectedSize, onSelectSize, currency }) => (
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency } = useContext(ShopContext);
+  const { products, currency, addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('');
   const [size, setSize] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const foundProduct = products.find(item => item._id === productId);
     if (foundProduct) {
       setProductData(foundProduct);
       setImage(foundProduct.image[0]); // Set the first image by default
+      setLoading(false);
     }
   }, [productId, products]);
 
-  if (!productData) {
-    return <div className='opacity-0'>Loading...</div>;
+  if (loading) {
+    return <div>Loading...</div>; // Display loading message
   }
 
   return (
@@ -115,6 +119,8 @@ const Product = () => {
           selectedSize={size}
           onSelectSize={setSize}
           currency={currency}
+          addToCart={addToCart} // Pass the addToCart function
+          productData={productData} // Pass the product data
         />
       </div>
 
@@ -130,7 +136,8 @@ const Product = () => {
           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, voluptate repellat. Tempore vero numquam ipsa eligendi debitis. Earum esse recusandae numquam fuga voluptate repellat qui natus rerum et vero. Sunt!</p>
         </div>
       </div>
-      {/* ---------------Display Related Products---------------- */}
+      
+      {/* Display Related Products */}
       <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
     </div>
   );
